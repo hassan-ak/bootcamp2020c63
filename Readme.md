@@ -4,6 +4,11 @@
 
 ### Class Notes
 
+There are two types of apps first is tightly coupled, where one component is so much dependant on the other that we cant change one without changing other, failure to one component will also cause a failure for other components. Other are loosely coupled which are totaly opposite of tightly coupled apps. Loosely coupled apps are knows as event driven architecture and are carried out with event bridge.
+Talking about event driven architecture there can be multiple event emitters and multiple event consumers. Connecting them together is a difficult job as each emitter to be connected to each client so what we can do connect all the emitters to an event bus and all clients to that bus too.
+Event bus comprises of rules and meta data. Event emitters can be AWS sevices, SaaS partners or apps and targets are AWS services while event busses can be Saas events, App events or AWS sercie events.
+Event driven system are asynchronous systems.
+
 ### Sections
 
 - [Eventbridge](./step15_eventbridge)

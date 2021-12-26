@@ -47,6 +47,63 @@
 
 9. Install event target in the stack using `npm i @aws-cdk/aws-events-targets`. Update "./lib/eventbridge_with_lambda-stack.ts" to define the rule that filters events to match country == "PK" and sends them to the consumer Lambda.
 
-```js
-import * as targets from '@aws-cdk/aws-events-targets';
-```
+   ```js
+   import * as targets from '@aws-cdk/aws-events-targets';
+   const PKrule = new events.Rule(this, 'orderPKLambda', {
+     targets: [new targets.LambdaFunction(consumerFn)],
+     description:
+       'Filter events that come from country PK and invoke lambda with it.',
+     eventPattern: {
+       detail: {
+         country: ['PK'],
+       },
+     },
+   });
+   ```
+
+10. Create "./lambda/producer.ts" to create producer handler
+
+    ```js
+    const AWS = require('aws-sdk');
+    function helper(body: any) {
+      const eventBridge = new AWS.EventBridge({ region: 'eu-west-2' });
+      return eventBridge
+        .putEvents({
+          Entries: [
+            {
+              EventBusName: 'default',
+              Source: 'custom.api',
+              DetailType: 'order',
+              Detail: `{ "country": "${body.country}" }`,
+            },
+          ],
+        })
+        .promise();
+    }
+    exports.handler = async function (event: any) {
+      console.log('EVENT BODY: \n', event.body);
+      const e = await helper(JSON.parse(event.body));
+      return {
+        statusCode: 200,
+        headers: { 'Content-Type': 'text/html' },
+        body: `<h1>Event Published to Eventbridge</h1>${JSON.stringify(
+          e,
+          null,
+          2
+        )}`,
+      };
+    };
+    ```
+
+11. Create "./lambda/cosnumer.ts" to create producer handler
+
+    ```js
+    exports.handler = async function (event: any, context: any) {
+      console.log('EVENT: \n' + JSON.stringify(event, null, 2));
+      return context.logStreamName;
+    };
+    ```
+
+12. Deploy the app using `npm run cdk deploy`
+
+13. Destroy the app using `npm run cdk destroy`
